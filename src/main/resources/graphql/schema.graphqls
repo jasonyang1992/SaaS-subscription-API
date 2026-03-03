@@ -1,0 +1,8 @@
+type SubscriptionPrice {
+    subscriptionType: String!
+    price: Int!
+}
+
+type Query {
+    getSubscriptionType(subscriptionType: String!): SubscriptionPrice
+}
