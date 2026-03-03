@@ -1,0 +1,3 @@
+scheduler:
+  midnight-task-cron: "0 0 0 * * *"
+  fifteen-second-task-cron : "0/15 * * * * *"
