@@ -58,4 +58,13 @@ public class StatusUtil {
                 .color("Red")
                 .build());
     }
+
+    public static void generateWorkflowStatus(RequestEvent requestEvent, String workflowName, int statusCode, String status, String color){
+        requestEvent.getStatusMap().add(Status.builder()
+                .workflow(workflowName)
+                .statusCode(statusCode)
+                .status(status)
+                .color(color)
+                .build());
+    }
 }
