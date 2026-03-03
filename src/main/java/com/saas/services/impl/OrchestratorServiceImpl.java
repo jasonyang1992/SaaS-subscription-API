@@ -37,13 +37,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         log.info("Processing event : {}, action : {} requestId {}", event, action, requestEvent.getRequestId());
 
         switch (event){
-            case "userEvent" -> processUserEvent(requestEvent);
-            case "billingEvent" -> {
-                // TODO paying bill
-            }
-            case "subscriptionEvent" -> {
-                // TODO add subscriptions
-            }
+            case "userEvent", "subscriptionEvent" -> processUserEvent(requestEvent);
             default -> StatusUtil.invalidEventName(requestEvent);
         }
     }
@@ -54,7 +48,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         try {
             processorFactory.getProcessor(action).process(requestEvent);
         } catch (Exception e){
-            log.warn("Invalid action {}, {}", action, e);
+            log.warn("An error has occurred for action {} with exception {}", action, e);
             StatusUtil.invalidActionName(requestEvent);
         }
     }
