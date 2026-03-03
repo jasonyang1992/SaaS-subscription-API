@@ -17,5 +17,7 @@ public class User {
     private String _id;
     private String username;
     private String password;
-    private UserRole role;
+    private String email;
+    private UserRole userRole;
+    private Tracking tracking;
 }

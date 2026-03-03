@@ -2,6 +2,7 @@ package com.saas.services.impl;
 
 import com.saas.model.domain.RequestEvent;
 import com.saas.model.domain.User;
+import com.saas.processor.factory.ProcessorFactory;
 import com.saas.services.OrchestratorService;
 import com.saas.utitly.StatusUtil;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +21,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private UserServiceImpl userService;
+    private ProcessorFactory processorFactory;
 
     @Override
     public RequestEvent process(Map<String, String> headers, Object data) {
@@ -33,7 +34,7 @@ public class OrchestratorServiceImpl implements OrchestratorService {
     private void processEvent(RequestEvent requestEvent){
         var event = requestEvent.getHeaders().get("event");
         var action = requestEvent.getHeaders().get("action");
-        log.info("Processing event : {}, action : {}", event, action);
+        log.info("Processing event : {}, action : {} requestId {}", event, action, requestEvent.getRequestId());
 
         switch (event){
             case "userEvent" -> processUserEvent(requestEvent);
@@ -49,27 +50,12 @@ public class OrchestratorServiceImpl implements OrchestratorService {
 
     private void processUserEvent(RequestEvent requestEvent){
         var action = requestEvent.getHeaders().get("action");
-        log.info("Begin processing data with action {}", action);
-        var userData = objectMapper.readValue(requestEvent.getData(), User.class);
-        switch (action){
-            case "createUser" -> {
 
-               var user = userService.createUser(userData);
-               if(user == null){
-                   StatusUtil.failedUserCreation(requestEvent);
-               } else {
-                   StatusUtil.successfulUserCreation(requestEvent);
-               }
-            }
-            case "updateUser" -> {
-                var updateCount = userService.updateUser(userData);
-                if (updateCount > 0) {
-                    StatusUtil.successfulUserUpdate(requestEvent);
-                } else {
-                    StatusUtil.failedUserUpdate(requestEvent);
-                }
-            }
-            default -> StatusUtil.invalidActionName(requestEvent);
+        try {
+            processorFactory.getProcessor(action).process(requestEvent);
+        } catch (Exception e){
+            log.warn("Invalid action {}, {}", action, e);
+            StatusUtil.invalidActionName(requestEvent);
         }
     }
 
